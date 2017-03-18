@@ -46,7 +46,10 @@ def main():
 			motion_image, motion_amount = detectMotion(image, prev_image)
 
 			if motion_amount > motion_threshold:
-				image.save(image_path)
+				save_filename = time.strftime('%x') + ' ' + time.strftime('%X') + '.jpg'
+				save_path = os.path.join(gallery_path, save_filename.replace('/', '-'))
+				print save_path
+				image.save(save_path)
 
 		# Swap image into prev_image
 		prev_image = image
