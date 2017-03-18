@@ -32,28 +32,33 @@ def main():
 		os.makedirs(gallery_path)
 
 	prev_image = None
+	
+	try:
+		while disk() < 90:
+			# Capture an image
+			camera.capture(image_path, format='png')
 
-	while disk() < 90:
-		# Capture an image
-		camera.capture(image_path, format='png')
+			# Process the image
+			image = Image(image_path)
+			image = image.rotate(-90)
 
-		# Process the image
-		image = Image(image_path)
-		image = image.rotate(-90)
+			# Detect motion
+			if not prev_image == None:
+				motion_image, motion_amount = detectMotion(image, prev_image)
 
-		# Detect motion
-		if not prev_image == None:
-			motion_image, motion_amount = detectMotion(image, prev_image)
+				if motion_amount > motion_threshold:
+					save_filename = time.strftime('%x') + ' ' + time.strftime('%X') + '.jpg'
+					save_path = os.path.join(gallery_path, save_filename.replace('/', '-'))
+					print "Motion: " + save_path
+					image.save(save_path)
 
-			if motion_amount > motion_threshold:
-				save_filename = time.strftime('%x') + ' ' + time.strftime('%X') + '.jpg'
-				save_path = os.path.join(gallery_path, save_filename.replace('/', '-'))
-				print save_path
-				image.save(save_path)
+			# Swap image into prev_image
+			prev_image = image
 
-		# Swap image into prev_image
-		prev_image = image
-	camera.close()
+		camera.close()
+
+	except:
+		camera.close()
 
 def disk():
 	p = os.popen("df -h /")
