@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import picamera
 from SimpleCV import *
@@ -54,6 +55,9 @@ def main():
 
 			# Swap image into prev_image
 			prev_image = image
+
+			# Flush standard output
+			sys.stdout.flush()
 
 		camera.close()
 
