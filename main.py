@@ -1,15 +1,41 @@
+print ("Importing...")
 import os
 import sys
 import time
+import MySQLdb
 import picamera
 from SimpleCV import *
 
-motion_threshold = 2.0
+motion_threshold = 1.0
 image_path = 'image.png'
 gallery_path = './gallery'
 
+print("Connecting to camera...")
 camera = picamera.PiCamera()
 
+print("Connecting to database...")
+db = None
+def dbconnect():
+	with open('../../mysql_py.txt') as creds_file:
+		creds = creds_file.readlines()
+		db = MySQLdb.connect(host=creds[0][:-1],
+				port=int(creds[1][:-1]),
+				user=creds[2][:-1],
+				passwd=creds[3][:-1],
+				db=creds[4][:-1])
+
+def dbquery(query):
+	cursor = None
+	try:
+		cursor = db.cursor()
+		cursor.execute(query)
+	except (AttributeError, MySQLdb.OperationalError):
+		dbconnect()
+		cursor = db.cursor()
+		cursor.execute(sql)
+	return cursor
+
+print("Modifying camera settings...")
 #camera.resolution = (3280, 2464)
 camera.sharpness = 0
 camera.contrast = 0
@@ -32,6 +58,7 @@ def main():
 	if not os.path.exists(gallery_path):
 		os.makedirs(gallery_path)
 
+	motion = False
 	prev_image = None
 	
 	try:
@@ -42,16 +69,21 @@ def main():
 			# Process the image
 			image = Image(image_path)
 			image = image.rotate(-90)
+			blank = (image.width - image.height) / 2
+			image = image.crop(blank, 0, image.height, image.height)
 
 			# Detect motion
 			if not prev_image == None:
 				motion_image, motion_amount = detectMotion(image, prev_image)
 
 				if motion_amount > motion_threshold:
+					motion = True
 					save_filename = time.strftime('%x') + ' ' + time.strftime('%X') + '.jpg'
-					save_path = os.path.join(gallery_path, save_filename.replace('/', '-'))
+					save_path = os.path.join(gallery_path, save_filename.replace('/', '-').replace(':', '-'))
 					print "Motion: " + save_path
 					image.save(save_path)
+				else:
+					motion = False
 
 			# Swap image into prev_image
 			prev_image = image
@@ -59,10 +91,15 @@ def main():
 			# Flush standard output
 			sys.stdout.flush()
 
-		camera.close()
+			# Sleep
+			if not motion:
+				time.sleep(1.0)
 
+		camera.close()
+		db.close()
 	except:
 		camera.close()
+		db.close()
 
 def disk():
 	p = os.popen("df -h /")
