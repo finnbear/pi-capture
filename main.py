@@ -56,8 +56,8 @@ def main():
 
 				if motion_amount > motion_threshold:
 					motion = True
-					save_filename = "/" + time.strftime('%x') + "/ " + time.strftime('%X') + '.jpg'
-					save_path = gallery_path + save_filename.replace('/', '-').replace(':', '-')
+					save_filename = "/" + time.strftime('%x') + "/" + time.strftime('%X') + '.jpg'
+					save_path = gallery_path + save_filename.replace(':', '-')
 					print "Motion: " + save_path
 					image.save(save_path)
 				else:
