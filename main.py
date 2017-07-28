@@ -6,34 +6,12 @@ import MySQLdb
 import picamera
 from SimpleCV import *
 
-motion_threshold = 1.0
+motion_threshold = 5
 image_path = 'image.png'
-gallery_path = './gallery'
+gallery_path = './gallery/'
 
 print("Connecting to camera...")
 camera = picamera.PiCamera()
-
-print("Connecting to database...")
-db = None
-def dbconnect():
-	with open('../../mysql_py.txt') as creds_file:
-		creds = creds_file.readlines()
-		db = MySQLdb.connect(host=creds[0][:-1],
-				port=int(creds[1][:-1]),
-				user=creds[2][:-1],
-				passwd=creds[3][:-1],
-				db=creds[4][:-1])
-
-def dbquery(query):
-	cursor = None
-	try:
-		cursor = db.cursor()
-		cursor.execute(query)
-	except (AttributeError, MySQLdb.OperationalError):
-		dbconnect()
-		cursor = db.cursor()
-		cursor.execute(sql)
-	return cursor
 
 print("Modifying camera settings...")
 #camera.resolution = (3280, 2464)
@@ -60,7 +38,7 @@ def main():
 
 	motion = False
 	prev_image = None
-	
+
 	try:
 		while disk() < 90:
 			# Capture an image
@@ -78,8 +56,8 @@ def main():
 
 				if motion_amount > motion_threshold:
 					motion = True
-					save_filename = time.strftime('%x') + ' ' + time.strftime('%X') + '.jpg'
-					save_path = os.path.join(gallery_path, save_filename.replace('/', '-').replace(':', '-'))
+					save_filename = "/" + time.strftime('%x') + "/ " + time.strftime('%X') + '.jpg'
+					save_path = gallery_path + save_filename.replace('/', '-').replace(':', '-')
 					print "Motion: " + save_path
 					image.save(save_path)
 				else:
@@ -96,10 +74,8 @@ def main():
 				time.sleep(1.0)
 
 		camera.close()
-		db.close()
 	except:
 		camera.close()
-		db.close()
 
 def disk():
 	p = os.popen("df -h /")
