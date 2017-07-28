@@ -2,7 +2,6 @@ print ("Importing...")
 import os
 import sys
 import time
-import MySQLdb
 import picamera
 from SimpleCV import *
 
@@ -58,8 +57,7 @@ def main():
 					motion = True
 					save_filename = time.strftime('%x')
 					date_segments = save_filename.split("/")
-					new_segments = [date_segments[2], date_segments[0], date_segments[1]]
-					save_filename = new_segments.join("/")
+					save_filename = date_segments[2] + "/" + date_segments[0] + "/" + date_segments[1]
 					save_filename = "/" + save_filename + "/" + time.strftime('%X') + '.jpg'
 					save_path = gallery_path + save_filename.replace(':', '-')
 					print "Motion: " + save_path
@@ -80,7 +78,8 @@ def main():
 				time.sleep(1.0)
 
 		camera.close()
-	except:
+	except None:
+		print("Error")
 		camera.close()
 
 def disk():
