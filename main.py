@@ -61,8 +61,8 @@ def main():
 					save_filename = "/" + save_filename + "/" + time.strftime('%X') + '.jpg'
 					save_path = gallery_path + save_filename.replace(':', '-')
 					print "Motion: " + save_path
-					if not os.path.exists(save_path):
-						os.makedirs(save_path)
+					if not os.path.exists(save_path[:-12]):
+						os.makedirs(save_path[:-12])
 					image.save(save_path)
 				else:
 					motion = False
@@ -78,7 +78,7 @@ def main():
 				time.sleep(1.0)
 
 		camera.close()
-	except None:
+	except:
 		print("Error")
 		camera.close()
 
